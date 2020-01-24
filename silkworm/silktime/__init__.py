@@ -1,13 +1,15 @@
-__all__ = ["CycleTimer", "TimedTask", "Timer", "Units"]
+__all__ = ["CycleTimer", "Timer", "Units"]
+
 from timeit import default_timer
 from .timer import Timer
 from .cycletimer import CycleTimer
-from .tasking import TimedTask
 from .units import Units
+
 """
-.. module::timer
+.. module::silktime
    :platform: Cross platform
-   :synopsis: Contains the Timer class.
+   :synopsis: Contains the timing libraries.
 
 .. moduleauthor:: Drason "Emmy" Chow <drasonchow@gmail.com>
+"""
 
