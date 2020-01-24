@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 0.1 - 2010-1-23
+### Added
+- Adobe LICENSE
+### Removed
+- Documentation in this repository. Will be refactored into its own repo.
+- tasking is no longer part of silktime and has been removed.
+### Changed
+- silktime no longer is a slew of seperate modules but is just one module now.
+- README.md has been updated to reflect the currently broken PyPI package.
+- Branch for silkdict is being refactor into its own repo ZMQDict.
+- Branch for silksim is being refactored and organized.
+
+
 ## 0.0.2 - 2019-6-5
 ### Added
 - Module documentation

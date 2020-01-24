@@ -1,21 +1,21 @@
 # SILKWORM
 
 ## What is SILKWORM?
-**S**IL
-**I**ntegrated
-**L**ibraries and
-**K**nowledgebase for
-**W**ork,
-**O**ngoing
-**R**esearch, and
-**Management**
+**S**IL  
+**I**ntegrated  
+**L**ibraries and  
+**K**nowledgebase for  
+**W**ork,  
+**O**ngoing  
+**R**esearch, and  
+**M**anagement
 These libraries were made for use by SIL at IUB for our projects; however, we have elected to make these following general utilities open source.
 
 ## What's in each branch?
-| Branch			| Description															                           |
+| Branch			 | Description															                                         |
 | ------------ | --------------------------------------------------------------------------------- |
 | master       | Tested, fully working, fully integrated, and reviewed by 2 people.                |
-| develop		| Tested, fully working, not integrated. Reviewed by comitters.                     | 
+| develop		   | Tested, fully working, not integrated. Reviewed by comitters.                     | 
 | silktime     | silktime package                                                                  |
 
 Branches that aren't master or develop are dedicated to packages. Large packages may have multiple branches and follow the convention `package/feature`
@@ -26,7 +26,8 @@ Branches that aren't master or develop are dedicated to packages. Large packages
 
 ## How Do I Use SILKWORM in My Project?
 
-For noncontributors simply looking for the packages, do `sudo pip3 install silkworm`
+~~For noncontributors simply looking for the packages, do `pip3 install silkworm`~~
+Currently there is no working PyPI package.
 
 ### Adding silkworm to your project
 Contributors also have the option adding silkworm as a gitmodule to their project so that they don't have to wait for a rebuild to PyPI for approval of new features that they need in their project.
