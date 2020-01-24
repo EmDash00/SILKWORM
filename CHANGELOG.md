@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - README.md has been updated to reflect the currently broken PyPI package.
 - Branch for silkdict is being refactor into its own repo ZMQDict.
 - Branch for silksim is being refactored and organized.
+- Unit testing is being reorganized.
 
 
 ## 0.0.2 - 2019-6-5
