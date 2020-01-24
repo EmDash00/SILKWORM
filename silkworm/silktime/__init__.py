@@ -19,6 +19,10 @@ class Units(Enum):
     NS = 1e9
 
 
+class TimeMismatch(Exception):
+    pass
+
+
 class Timer:
     """
     High precision timer utility class that makes it easy to time events
@@ -108,7 +112,7 @@ class Timer:
 
     def reset(self, pause=True):
         """
-        Resets the time elapsed. Currently there is no way to count cycles
+        Resets the time elapsed. Currently there is no way to count intervals
         independently of time elapsed. This is a feature planned for a
         future update.
 
@@ -141,10 +145,6 @@ class Timer:
             self._paused = True
 
 
-class TimeMismatch(Exception):
-    pass
-
-
 class IntervalTimer(Timer):
     """
     Inherits from Timer.
@@ -155,13 +155,13 @@ class IntervalTimer(Timer):
         """
         Instantiates a CycleTimer object
 
-        :param interval: interval between timer cycles.
+        :param interval: interval between timer intervals.
         interval = 0 will raise a ValueError
 
         :type interval: float
 
         :param strict: if true, the timer will raise an exception if an
-        unacceptable number of clock cycles is skipped. False by default.
+        unacceptable number of clock intervals is skipped. False by default.
 
         :type strict: bool
 
@@ -182,9 +182,9 @@ class IntervalTimer(Timer):
         self._strict = strict
         self._grace_period = grace_period
 
-        self._cycles = 0
+        self._intervals = 0
 
-        # Call to elapsed sets _cycles
+        # Call to elapsed sets _intervals
         self.elapsed()
 
     def set_strictness(self, strict=False):
@@ -199,16 +199,16 @@ class IntervalTimer(Timer):
 
     def set_interval(self, interval, align=False, redefine_past=False):
         """
-        Set the interval between timer cycles
+        Set the interval between timer intervals
 
-        :param interval: interval between timer cycles in the timer's units
+        :param interval: interval between timer intervals in the timer's units
         :type interval: float
 
         :param align: whether or not to wait for the current timer cycle to
         complete. False sets the interval immediately. Defaults to false
         :type align: bool
 
-        :param redefine_past: redefines all past cycles to use the new
+        :param redefine_past: redefines all past intervals to use the new
         interval, reinterpretting the current value of elapsed time.
         Defaults to false.
 
@@ -239,12 +239,12 @@ class IntervalTimer(Timer):
 
     def elapsed(self):
         """
-        Compute total fractional number of timer cycles since the last set
+        Compute total fractional number of timer intervals since the last set
 
         :raises TimerMismatch: Exception raised in strict timers that exceed
         the grace period between calls to elapsed() or tick()
 
-        :returns: Fractional number of timer cycles elapsed
+        :returns: Fractional number of timer intervals elapsed
         :rtype: float
         """
 
@@ -260,11 +260,11 @@ class IntervalTimer(Timer):
 
                 # expected difference is 1
                 if (self._strict):
-                    if ((now - self._cycles) > (self._grace_period + 1)):
+                    if ((now - self._intervals) > (self._grace_period + 1)):
                         raise TimeMismatch(
                             "Timer mistmatch. One or more clock cycle(s) "
                             "was skipped.")
-                self._cycles = now
+                self._intervals = now
                 return now
 
         except ValueError:
@@ -274,27 +274,27 @@ class IntervalTimer(Timer):
 
     def elapsed_discrete(self):
         """
-        Compute whole number of timer cycles since the last set
+        Compute whole number of timer intervals since the last set
 
-        :returns: Whole number of timer cycles elapsed
+        :returns: Whole number of timer intervals elapsed
         :rtype: int
         """
         return floor(self.elapsed())
 
     def stop(self):
-        """Pauses the timer noting the current number of cycles"""
+        """Pauses the timer noting the current number of intervals"""
         super().stop()
-        self._cycles = self._mem
+        self._intervals = self._mem
 
     def tick(self):
         """
-        Tells whether one or more clock cycles have been completed since the
-        last call tick() or cycles()
+        Tells whether one or more clock intervals have been completed since the
+        last call tick() or intervals()
 
         :returns: True or False depending on whether or not one or more whole
-        clock cycles have been completed since the last call to tick()
+        clock intervals have been completed since the last call to tick()
         or elapsed()
 
         :rtype: bool
         """
-        return (floor(self._cycles) < self.elapsed_discrete())
+        return (floor(self._intervals) < self.elapsed_discrete())
