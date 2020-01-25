@@ -8,8 +8,10 @@
 **W**ork,  
 **O**ngoing  
 **R**esearch, and  
-**M**anagement
+**M**anagement  
 These libraries were made for use by SIL at IUB for our projects; however, we have elected to make these following general utilities open source.
+
+Currently I (Drason Chow) am the mantainer for this project.
 
 ## What's in each branch?
 | Branch			 | Description															                                         |
@@ -22,7 +24,13 @@ Branches that aren't master or develop are dedicated to packages. Large packages
 
 ## Currently Available Packages
 * [silktime](silkworm/silktime)
-	Standard utilties for high fidelity timing.
+	Standard utilties for general no fuss high fidelity timing.
+
+## Packages Under Development
+* silkmath
+  Standard high fidelity manipulation of vectors of Rn as well as state vectors.
+* silksim
+  Simulation libraries using RK4 that act on silkmath vectors.
 
 ## How Do I Use SILKWORM in My Project?
 
