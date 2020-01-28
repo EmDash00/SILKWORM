@@ -71,6 +71,7 @@ class Timer:
         self._units = units
         self._paused = not (start)
 
+        self._tlast = 0
         self._mem = 0
 
     @staticmethod
@@ -110,6 +111,20 @@ class Timer:
         else:
             return (self._clock() - self._t0 + self._mem)
 
+    def delta(self):
+        """
+        Gets the time between now and the last call delta().
+
+        :return: time difference in the timer's units.
+        :rtype: float
+        """
+
+        t = self.get()
+        dt = t - self._tlast
+        self._tlast = t
+
+        return (dt)
+
     def reset(self, pause=True):
         """
         Resets the time get. Currently there is no way to count intervals
@@ -143,7 +158,6 @@ class Timer:
         if (not self._paused):
             self._mem = self.get()
             self._paused = True
-
 
 class IntervalTimer(Timer):
     """
@@ -298,3 +312,13 @@ class IntervalTimer(Timer):
         :rtype: bool
         """
         return (floor(self._intervals) < self.get_discrete())
+
+    def synchronize(self):
+        """
+        Blocks current thread's execution until a tick has occured.
+        """
+
+        while not self.tick():
+            pass
+
+
