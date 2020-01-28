@@ -19,7 +19,7 @@ class Units(Enum):
     NS = 1e9
 
 
-class TimeMismatch(Exception):
+class LatencyError(Exception):
     pass
 
 
@@ -50,7 +50,7 @@ class Timer:
         :type start: bool
 
         :param count_sleep: The timer counts time the process is asleep as
-        having elapsed. True by default.
+        having get. True by default.
 
         :type count_sleep: bool
 
@@ -92,11 +92,11 @@ class Timer:
 
         self._units = units
 
-    def elapsed(self):
+    def get(self):
         """
-        Compute the amount of time elapsed since the last elapsed time reset
+        Compute the amount of time get since the last get time reset
 
-        :return: time elapsed in the timer's units (timer - t0)
+        :return: time get in the timer's units (timer - t0)
         :rtype: float
         """
         if (self._paused):
@@ -104,7 +104,7 @@ class Timer:
         else:
             return ((self._clock() - self._t0) * self._units.value + self._mem)
 
-    def elapsed_raw(self):
+    def get_raw(self):
         if (self._paused):
             return self._mem
         else:
@@ -112,8 +112,8 @@ class Timer:
 
     def reset(self, pause=True):
         """
-        Resets the time elapsed. Currently there is no way to count intervals
-        independently of time elapsed. This is a feature planned for a
+        Resets the time get. Currently there is no way to count intervals
+        independently of time get. This is a feature planned for a
         future update.
 
         :param pause: pause the timer after resetting. default value is True.
@@ -141,17 +141,17 @@ class Timer:
         """
 
         if (not self._paused):
-            self._mem = self.elapsed()
+            self._mem = self.get()
             self._paused = True
 
 
 class IntervalTimer(Timer):
     """
     Inherits from Timer.
-    An elegant way of measuring a number of elapsed fixed time intervals.
+    An elegant way of measuring a number of get fixed time intervals.
     """
 
-    def __init__(self, interval, strict=False, grace_period=1, **kwargs):
+    def __init__(self, interval, strict=False, tolerance=1, **kwargs):
         """
         Instantiates a CycleTimer object
 
@@ -160,19 +160,18 @@ class IntervalTimer(Timer):
 
         :type interval: float
 
-        :param strict: if true, the timer will raise an exception if an
-        unacceptable number of clock intervals is skipped. False by default.
+        :param strict: if true, the timer will be strict. See set_strictness.
 
         :type strict: bool
 
-        :param grace_period: maximum acceptable time between calls to
-        elapsed() or tick(). Good if lag in a system is unacceptable.
+        :param tolerance: maximum acceptable time between calls to
+        get() or tick(). Use if lag is unacceptable.
 
-        :type grace_period: float
+        :type tolerance: float
 
         :raises: ValueError
         :returns: newly instantiated CycleTimer object
-        :rtype: CycleTimer
+        :rtype: IntervalTimer
 
         """
 
@@ -184,12 +183,13 @@ class IntervalTimer(Timer):
 
         self._intervals = 0
 
-        # Call to elapsed sets _intervals
-        self.elapsed()
+        # Call to get sets _intervals
+        self.get()
 
     def set_strictness(self, strict=False):
         """
-        Sets the strictness of the timer.
+        Sets the strictness of the timer. A strict Timer throws a
+        LatencyError if it experiences more latency than its set tolerance.
 
         :param strict: The strictness of the timer. False by default.
         :type strict: bool
@@ -209,7 +209,7 @@ class IntervalTimer(Timer):
         :type align: bool
 
         :param redefine_past: redefines all past intervals to use the new
-        interval, reinterpretting the current value of elapsed time.
+        interval, reinterpretting the current value of get time.
         Defaults to false.
 
         :type redefine_past: bool
@@ -222,29 +222,29 @@ class IntervalTimer(Timer):
         if (redefine_past):
             self._mem *= (self._interval / interval)
         else:
-            self._mem = self.elapsed()
+            self._mem = self.get()
             self._t0 = default_timer()
 
         self._interval = interval
 
-    def set_grace_period(self, grace_period):
+    def set_tolerance(self, tolerance):
         """
-        Sets the grace period of the timer.
+        Sets the latency tolerance of the timer.
 
-        :param grace_period: the grace period of the time
+        :param grace_period: the tolerance of the timer
         :type grace_period: float
         """
 
         self._grace_period = grace_period
 
-    def elapsed(self):
+    def get(self):
         """
         Compute total fractional number of timer intervals since the last set
 
         :raises TimerMismatch: Exception raised in strict timers that exceed
-        the grace period between calls to elapsed() or tick()
+        the grace period between calls to get() or tick()
 
-        :returns: Fractional number of timer intervals elapsed
+        :returns: Fractional number of timer intervals get
         :rtype: float
         """
 
@@ -261,8 +261,8 @@ class IntervalTimer(Timer):
                 # expected difference is 1
                 if (self._strict):
                     if ((now - self._intervals) > (self._grace_period + 1)):
-                        raise TimeMismatch(
-                            "Timer mistmatch. One or more clock cycle(s) "
+                        raise LatencyError(
+                            "Latency Error. One or more clock cycle(s) "
                             "was skipped.")
                 self._intervals = now
                 return now
@@ -272,14 +272,14 @@ class IntervalTimer(Timer):
                 "Cycles cannot be counted with interval 0 (default interval)")
             raise ValueError
 
-    def elapsed_discrete(self):
+    def get_discrete(self):
         """
         Compute whole number of timer intervals since the last set
 
-        :returns: Whole number of timer intervals elapsed
+        :returns: Whole number of timer intervals get
         :rtype: int
         """
-        return floor(self.elapsed())
+        return floor(self.get())
 
     def stop(self):
         """Pauses the timer noting the current number of intervals"""
@@ -293,8 +293,8 @@ class IntervalTimer(Timer):
 
         :returns: True or False depending on whether or not one or more whole
         clock intervals have been completed since the last call to tick()
-        or elapsed()
+        or get()
 
         :rtype: bool
         """
-        return (floor(self._intervals) < self.elapsed_discrete())
+        return (floor(self._intervals) < self.get_discrete())
