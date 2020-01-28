@@ -1,4 +1,5 @@
-from timeit import default_timer, process_time
+from timeit import default_timer
+from time import process_time
 from math import floor
 from enum import Enum
 """
