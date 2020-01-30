@@ -160,6 +160,7 @@ class Timer:
             self._mem = self.get()
             self._paused = True
 
+
 class IntervalTimer(Timer):
     """
     Inherits from Timer.
@@ -194,7 +195,7 @@ class IntervalTimer(Timer):
 
         self._interval = interval
         self._strict = strict
-        self._grace_period = grace_period
+        self._tolerance = tolerance
 
         self._intervals = 0
 
@@ -246,11 +247,11 @@ class IntervalTimer(Timer):
         """
         Sets the latency tolerance of the timer.
 
-        :param grace_period: the tolerance of the timer
-        :type grace_period: float
+        :param tolerance: the tolerance of the timer
+        :type tolerance: float
         """
 
-        self._grace_period = grace_period
+        self._tolerance = tolerance
 
     def get(self):
         """
@@ -275,7 +276,7 @@ class IntervalTimer(Timer):
 
                 # expected difference is 1
                 if (self._strict):
-                    if ((now - self._intervals) > (self._grace_period + 1)):
+                    if ((now - self._intervals) > (self._tolerance + 1)):
                         raise LatencyError(
                             "Latency Error. One or more clock cycle(s) "
                             "was skipped.")
@@ -321,5 +322,3 @@ class IntervalTimer(Timer):
 
         while not self.tick():
             pass
-
-
