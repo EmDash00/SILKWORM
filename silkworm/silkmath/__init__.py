@@ -6,7 +6,7 @@ class RangeError(ValueError):
     pass
 
 
-def clamp(x, limits):
+def clamp(limits, x):
     """
     A combination of max and min that ensures x is within the range defined.
 
@@ -21,7 +21,7 @@ def clamp(x, limits):
     return max(limits[0], min(x, limits[1]))
 
 
-def in_range(x, valid_range):
+def in_range(limits, x):
     """
     Tells whether x is within the specified range.
 
@@ -29,9 +29,9 @@ def in_range(x, valid_range):
     :returns: Whether or not x is within valid_range.
     """
 
-    if (valid_range[0] >= valid_range[1]):
+    if (limits[0] >= limits[1]):
         raise RangeError("valid_range must be in the format (min, max)")
-    return (x < valid_range[1] and x > valid_range[0])
+    return (x < limits[1] and x > limits[0])
 
 
 def calc_1daffine_map(domain, image, strict=False):
