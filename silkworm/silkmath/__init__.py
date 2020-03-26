@@ -2,10 +2,16 @@ import numpy as np
 
 
 class RangeError(ValueError):
+    """Thrown when min is greater than or equal to max in a range."""
     pass
 
 
 def clamp(x, limits):
+    """
+    A combination of max and min that ensures x is within the range defined.
+
+    :returns: x under the clamp function.
+    """
     if (len(limits) != 2):
         raise ValueError(
             "x_range must a list or tuple in the format (min, max)")
@@ -16,12 +22,24 @@ def clamp(x, limits):
 
 
 def in_range(x, valid_range):
+    """
+    Tells whether x is within the specified range.
+
+    :rtype: bool
+    :returns: Whether or not x is within valid_range.
+    """
+
     if (valid_range[0] >= valid_range[1]):
         raise RangeError("valid_range must be in the format (min, max)")
     return (x < valid_range[1] and x > valid_range[0])
 
 
 def calc_1daffine_map(domain, image, strict=False):
+    """
+    Calculates an affine map (a map of the form mx + b).
+
+    :returns: A lambda that encodes the map.
+    """
 
     m = (image[1] - image[0]) / (domain[1] - domain[0])
     b = -m * domain[0] + image[0]
@@ -61,12 +79,17 @@ def calc_ndlinear_map(domain, image):
     return (lambda x: T * x)
 
 
-def circular_map(theta, domain):
+def cyclic_map(theta, domain):
     """
-    Defines a circular domain (like angles between 0 and 2np.pi) to map x to.
+    Defines a cyclic domain (like angles between 0 and 2pi) to map theta to.
+    For angles, this would map any angle out of the 0 to 2pi range to their
+    equivalents in the 0 to 2pi range.
 
     :param x: The scalar to be mapped
     :param domain: A tuple of values expresnp.sing the domain as a range.
+
+    :rtype: float
+    :returns: the mapped theta.
     """
     if (domain[1] <= domain[0]):
         raise RangeError("The minimum must be less than the maximum.")
@@ -76,6 +99,11 @@ def circular_map(theta, domain):
 
 
 class Vector:
+    """
+    Defines an n-dimensional vector from an array with operator overloading
+    that encodes dot product, scalar multiplication, and the cross product.
+    """
+
     def __init__(self, components, dtype=np.float64):
         self._arr = np.array(components, dtype=dtype)
 
@@ -149,6 +177,10 @@ class Vector:
 
 
 class MetaStateVector(type):
+    """
+    Defines a vector with special index names for state space vectors.
+    """
+
     def __new__(cls, class_name, parents, attrs, params):
         def autoproperty(index):
             def getter(self):
@@ -182,6 +214,22 @@ class MetaStateVector(type):
 
 
 class PhysicalVector(Vector):
+    """
+    Generates a 3D vector that encodes the dot product, scalar multiplication,
+    and cross product into python operators.
+
+    Also supports additional operations such as rotation.
+
+    Encodes special names for the indicies of the vector.
+
+    Supports cartesian, polar, and cylindrical notation. Every set operation
+    sets r, theta, phi, x, y, and z simultaneously. For this reason, the most
+    accurate representation will always be the one you use for construction.
+
+    Supports 2D vectors (since they're a subset of 3D vectors)
+
+    """
+
     def __init__(self, components=[0, 0, 0]):
         super().__init__(components)
 
@@ -199,10 +247,16 @@ class PhysicalVector(Vector):
 
     @staticmethod
     def polar(r, phi):
+        """
+        Constructs a polar style PhysicalVector.
+        """
         return PhysicalVector([r * np.cos(phi), r * np.sin(phi)])
 
     @staticmethod
     def spherical(r, theta, phi):
+        """
+        Constructs a spherical style PhysicalVector.
+        """
         return PhysicalVector([
             r * np.sin(theta) * np.cos(phi), r * np.sin(theta) * np.sin(phi),
             r * np.cos(theta)
@@ -210,25 +264,51 @@ class PhysicalVector(Vector):
 
     @staticmethod
     def cylindrical(r, phi, z):
+        """
+        Constructs a cylindrical style PhysicalVector.
+        """
         PhysicalVector([r * np.cos(phi), r * np.sin(phi), z])
 
     @staticmethod
     def normal(v):
+        """
+        Constructs a normalized version of vector v.
+
+        :param v: A PhysicalVector to normalize
+
+        :rtype: PhysicalVector
+        :returns: A PhysicalVector that is the normalized form of v.
+        """
         return PhysicalVector(v._arr / v.magnitude())
 
     def magnitude(self):
+        """
+        Gets the magnitude of the vector.
+
+        :rtype: float
+        :returns: The magnitude of the vector
+        """
         return ((self._arr[0]**2 + self._arr[1]**2 + self._arr[2]**2)**(1 / 2))
 
-    def normalize(self):
-        self._arr /= self.magnitude()
-
     def rotate2(self, phi):
+        """
+        Rotates the vector about the z axis in the xy plane.
+
+        :param phi: Angle in radians to rotate counterclockwise.
+        """
         A = np.array([[np.cos(phi), -np.sin(phi), 0],
                       [np.sin(phi), np.cos(phi), 0], [0, 0, 1]])
 
         self._arr = np.dot(A, self._arr)
 
     def rotate3(self, axis, phi):
+        """
+        Rotates the vector about an axis vector using quaternion
+        multiplication.
+
+        :param axis: The axis to rotate about.
+        :param phi: Angle in radians to rotate counterclockwise.
+        """
         phi /= 2
         axis.normalize()
 
