@@ -108,13 +108,13 @@ class Vector:
         self._arr = np.array(components, dtype=dtype)
 
     def __add__(self, v):
-        return Vector(self._arr + v._arr)
+        return type(self)(self._arr + v._arr)
 
     def __iadd__(self, v):
         self._arr += v._arr
 
     def __sub__(self, v):
-        return Vector(self._arr - v._arr)
+        return type(self)(self._arr - v._arr)
 
     def __isub__(self, v):
         self._arr -= v._arr
