@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np  # type: ignore
 
 
 class RangeError(ValueError):
@@ -126,6 +126,12 @@ class Vector:
 
         self._arr *= c
 
+    def __getitem__(self, i):
+        return self._arr[i]
+
+    def __setitem__(self, i, val):
+        self._arr[i] = val
+
     def __idiv__(self, c):
         if (not isinstance(c, (float, int))):
             raise TypeError("This operation is only supported for scalar "
@@ -213,7 +219,7 @@ class MetaStateVector(type):
         return obj
 
 
-class PhysicalVector(Vector):
+class CartesianVector(Vector):
     """
     Generates a 3D vector that encodes the dot product, scalar multiplication,
     and cross product into python operators.
@@ -240,24 +246,24 @@ class PhysicalVector(Vector):
         self._arr = np.pad(components, (0, np.padding), 'constant')
 
     def __matmul__(self, v2):
-        return PhysicalVector(np.cross(self._arr, v2._arr))
+        return CartesianVector(np.cross(self._arr, v2._arr))
 
     def __rmatmul__(self, v2):
-        return PhysicalVector(np.cross(v2, self._arr))
+        return CartesianVector(np.cross(v2, self._arr))
 
     @staticmethod
     def polar(r, phi):
         """
-        Constructs a polar style PhysicalVector.
+        Constructs a polar style CartesianVector.
         """
-        return PhysicalVector([r * np.cos(phi), r * np.sin(phi)])
+        return CartesianVector([r * np.cos(phi), r * np.sin(phi)])
 
     @staticmethod
     def spherical(r, theta, phi):
         """
-        Constructs a spherical style PhysicalVector.
+        Constructs a spherical style CartesianVector.
         """
-        return PhysicalVector([
+        return CartesianVector([
             r * np.sin(theta) * np.cos(phi), r * np.sin(theta) * np.sin(phi),
             r * np.cos(theta)
         ])
@@ -265,21 +271,21 @@ class PhysicalVector(Vector):
     @staticmethod
     def cylindrical(r, phi, z):
         """
-        Constructs a cylindrical style PhysicalVector.
+        Constructs a cylindrical style CartesianVector.
         """
-        PhysicalVector([r * np.cos(phi), r * np.sin(phi), z])
+        CartesianVector([r * np.cos(phi), r * np.sin(phi), z])
 
     @staticmethod
     def normal(v):
         """
         Constructs a normalized version of vector v.
 
-        :param v: A PhysicalVector to normalize
+        :param v: A CartesianVector to normalize
 
-        :rtype: PhysicalVector
-        :returns: A PhysicalVector that is the normalized form of v.
+        :rtype: CartesianVector
+        :returns: A CartesianVector that is the normalized form of v.
         """
-        return PhysicalVector(v._arr / v.magnitude())
+        return CartesianVector(v._arr / v.magnitude())
 
     def magnitude(self):
         """
@@ -340,21 +346,67 @@ class PhysicalVector(Vector):
     def x(self):
         return self._arr[0]
 
+    @x.setter
+    def x(self, value):
+        self._arr[0] = value
+
     @property
     def y(self):
         return self._arr[1]
+
+    @y.setter
+    def y(self, value):
+        self._arr[1] = value
 
     @property
     def z(self):
         return self._arr[2]
 
+    @z.setter
+    def z(self, value):
+        self._arr[2] = value
+
     @property
     def r(self):
         return (self.x**2 + self.y**2)**(1 / 2)
 
+    @r.setter
+    def r(self, value):
+        theta = self.theta
+
+        self._arr[0] = value * np.cos(theta)
+        self._arr[1] = value * np.sin(theta)
+
     @property
     def rho(self):
         return self.magnitude()
+
+    @rho.setter
+    def rho(self, value):
+        phi = self.phi
+        theta = self.theta
+
+        self._arr[0] = value * np.sin(theta) * np.cos(phi)
+        self._arr[1] = value * np.sin(theta) * np.sin(phi)
+        self._arr[2] = value * np.cos(theta)
+
+    @property
+    def theta(self):
+        magnitude = self.magnitude()
+
+        if (magnitude == 0):
+            return 0
+
+        return np.arccos(self._arr[2] / self.magnitude())
+
+    @theta.setter
+    def theta(self, value):
+        phi = self.phi
+        rho = self.rho
+
+        self._arr[0] = rho * np.sin(value) * np.cos(phi)
+        self._arr[1] = rho * np.sin(value) * np.sin(phi)
+        self._arr[2] = rho * np.cos(value)
 
     @property
     def phi(self):
@@ -368,55 +420,9 @@ class PhysicalVector(Vector):
 
         return np.arctan(self._arr[1] / self._arr[0])
 
-    @property
-    def theta(self):
-        magnitude = self.magnitude()
-
-        if (magnitude == 0):
-            return 0
-
-        return np.arccos(self._arr[2] / self.magnitude())
-
-    @r.setter
-    def r(self, value):
-        theta = self.theta
-
-        self._arr[0] = value * np.cos(theta)
-        self._arr[1] = value * np.sin(theta)
-
     @phi.setter
     def phi(self, value):
         r = self.r
 
         self._arr[0] = r * np.cos(value)
         self._arr[1] = r * np.sin(value)
-
-    @theta.setter
-    def theta(self, value):
-        phi = self.phi
-        rho = self.rho
-
-        self._arr[0] = rho * np.sin(value) * np.cos(phi)
-        self._arr[1] = rho * np.sin(value) * np.sin(phi)
-        self._arr[2] = rho * np.cos(value)
-
-    @rho.setter
-    def rho(self, value):
-        phi = self.phi
-        theta = self.theta
-
-        self._arr[0] = value * np.sin(theta) * np.cos(phi)
-        self._arr[1] = value * np.sin(theta) * np.sin(phi)
-        self._arr[2] = value * np.cos(theta)
-
-    @x.setter
-    def x(self, value):
-        self._arr[0] = value
-
-    @y.setter
-    def y(self, value):
-        self._arr[1] = value
-
-    @z.setter
-    def z(self, value):
-        self._arr[2] = value
