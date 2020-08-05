@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np  # type: ignore
 
 
 class RangeError(ValueError):
@@ -340,21 +340,67 @@ class PhysicalVector(Vector):
     def x(self):
         return self._arr[0]
 
+    @x.setter
+    def x(self, value):
+        self._arr[0] = value
+
     @property
     def y(self):
         return self._arr[1]
+
+    @y.setter
+    def y(self, value):
+        self._arr[1] = value
 
     @property
     def z(self):
         return self._arr[2]
 
+    @z.setter
+    def z(self, value):
+        self._arr[2] = value
+
     @property
     def r(self):
         return (self.x**2 + self.y**2)**(1 / 2)
 
+    @r.setter
+    def r(self, value):
+        theta = self.theta
+
+        self._arr[0] = value * np.cos(theta)
+        self._arr[1] = value * np.sin(theta)
+
     @property
     def rho(self):
         return self.magnitude()
+
+    @rho.setter
+    def rho(self, value):
+        phi = self.phi
+        theta = self.theta
+
+        self._arr[0] = value * np.sin(theta) * np.cos(phi)
+        self._arr[1] = value * np.sin(theta) * np.sin(phi)
+        self._arr[2] = value * np.cos(theta)
+
+    @property
+    def theta(self):
+        magnitude = self.magnitude()
+
+        if (magnitude == 0):
+            return 0
+
+        return np.arccos(self._arr[2] / self.magnitude())
+
+    @theta.setter
+    def theta(self, value):
+        phi = self.phi
+        rho = self.rho
+
+        self._arr[0] = rho * np.sin(value) * np.cos(phi)
+        self._arr[1] = rho * np.sin(value) * np.sin(phi)
+        self._arr[2] = rho * np.cos(value)
 
     @property
     def phi(self):
@@ -368,55 +414,9 @@ class PhysicalVector(Vector):
 
         return np.arctan(self._arr[1] / self._arr[0])
 
-    @property
-    def theta(self):
-        magnitude = self.magnitude()
-
-        if (magnitude == 0):
-            return 0
-
-        return np.arccos(self._arr[2] / self.magnitude())
-
-    @r.setter
-    def r(self, value):
-        theta = self.theta
-
-        self._arr[0] = value * np.cos(theta)
-        self._arr[1] = value * np.sin(theta)
-
     @phi.setter
     def phi(self, value):
         r = self.r
 
         self._arr[0] = r * np.cos(value)
         self._arr[1] = r * np.sin(value)
-
-    @theta.setter
-    def theta(self, value):
-        phi = self.phi
-        rho = self.rho
-
-        self._arr[0] = rho * np.sin(value) * np.cos(phi)
-        self._arr[1] = rho * np.sin(value) * np.sin(phi)
-        self._arr[2] = rho * np.cos(value)
-
-    @rho.setter
-    def rho(self, value):
-        phi = self.phi
-        theta = self.theta
-
-        self._arr[0] = value * np.sin(theta) * np.cos(phi)
-        self._arr[1] = value * np.sin(theta) * np.sin(phi)
-        self._arr[2] = value * np.cos(theta)
-
-    @x.setter
-    def x(self, value):
-        self._arr[0] = value
-
-    @y.setter
-    def y(self, value):
-        self._arr[1] = value
-
-    @z.setter
-    def z(self, value):
-        self._arr[2] = value
