@@ -126,6 +126,12 @@ class Vector:
 
         self._arr *= c
 
+    def __getitem__(self, i):
+        return self._arr[i]
+
+    def __setitem__(self, i, val):
+        self._arr[i] = val
+
     def __idiv__(self, c):
         if (not isinstance(c, (float, int))):
             raise TypeError("This operation is only supported for scalar "
@@ -213,7 +219,7 @@ class MetaStateVector(type):
         return obj
 
 
-class PhysicalVector(Vector):
+class CartesianVector(Vector):
     """
     Generates a 3D vector that encodes the dot product, scalar multiplication,
     and cross product into python operators.
@@ -240,24 +246,24 @@ class PhysicalVector(Vector):
         self._arr = np.pad(components, (0, np.padding), 'constant')
 
     def __matmul__(self, v2):
-        return PhysicalVector(np.cross(self._arr, v2._arr))
+        return CartesianVector(np.cross(self._arr, v2._arr))
 
     def __rmatmul__(self, v2):
-        return PhysicalVector(np.cross(v2, self._arr))
+        return CartesianVector(np.cross(v2, self._arr))
 
     @staticmethod
     def polar(r, phi):
         """
-        Constructs a polar style PhysicalVector.
+        Constructs a polar style CartesianVector.
         """
-        return PhysicalVector([r * np.cos(phi), r * np.sin(phi)])
+        return CartesianVector([r * np.cos(phi), r * np.sin(phi)])
 
     @staticmethod
     def spherical(r, theta, phi):
         """
-        Constructs a spherical style PhysicalVector.
+        Constructs a spherical style CartesianVector.
         """
-        return PhysicalVector([
+        return CartesianVector([
             r * np.sin(theta) * np.cos(phi), r * np.sin(theta) * np.sin(phi),
             r * np.cos(theta)
         ])
@@ -265,21 +271,21 @@ class PhysicalVector(Vector):
     @staticmethod
     def cylindrical(r, phi, z):
         """
-        Constructs a cylindrical style PhysicalVector.
+        Constructs a cylindrical style CartesianVector.
         """
-        PhysicalVector([r * np.cos(phi), r * np.sin(phi), z])
+        CartesianVector([r * np.cos(phi), r * np.sin(phi), z])
 
     @staticmethod
     def normal(v):
         """
         Constructs a normalized version of vector v.
 
-        :param v: A PhysicalVector to normalize
+        :param v: A CartesianVector to normalize
 
-        :rtype: PhysicalVector
-        :returns: A PhysicalVector that is the normalized form of v.
+        :rtype: CartesianVector
+        :returns: A CartesianVector that is the normalized form of v.
         """
-        return PhysicalVector(v._arr / v.magnitude())
+        return CartesianVector(v._arr / v.magnitude())
 
     def magnitude(self):
         """
