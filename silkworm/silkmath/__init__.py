@@ -72,8 +72,8 @@ def calc_ndlinear_map(domain, image):
     :param image: The image of the transformation expressed as the set of basis
     vectors under the transformation.
     """
-    A = np.np.array(domain)
-    B = np.np.array(image)
+    A = np.array(domain)
+    B = np.array(image)
     T = np.linalg.inv(A) * B
 
     return (lambda x: T * x)
@@ -236,8 +236,8 @@ class CartesianVector(Vector):
 
     """
 
-    def __init__(self, components=[0, 0, 0]):
-        super().__init__(components)
+    def __init__(self, components=[0.0, 0.0, 0.0]):
+        super().__init__(components, dtype=np.float64)
 
         if (len(components) != 3 and len(components) != 2):
             raise ValueError("Physical vectors must be 2 or 3 dimensional")
@@ -302,8 +302,8 @@ class CartesianVector(Vector):
 
         :param phi: Angle in radians to rotate counterclockwise.
         """
-        A = np.array([[np.cos(phi), -np.sin(phi), 0],
-                      [np.sin(phi), np.cos(phi), 0], [0, 0, 1]])
+        A = np.array([[np.cos(phi), -np.sin(phi), 0.0],
+                      [np.sin(phi), np.cos(phi), 0.0], [0.0, 0.0, 1.0]])
 
         self._arr = np.dot(A, self._arr)
 
@@ -323,7 +323,7 @@ class CartesianVector(Vector):
         y0 = axis.y * np.sin(phi)
         z0 = axis.z * np.sin(phi)
 
-        w1 = 0
+        w1 = 0.0
         x1 = self.x
         y1 = self.y
         z1 = self.z
